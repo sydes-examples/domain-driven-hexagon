@@ -44,6 +44,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+      - run: npm install --legacy-peer-deps
       - run: NODE_ENV=test npm run migration:up:tests
       - run: npx jest -i --config jest-e2e.json tests/user/create-user tests/user/delete-user
