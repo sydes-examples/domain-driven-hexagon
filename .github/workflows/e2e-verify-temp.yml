@@ -11,7 +11,10 @@ name: Temp E2E Verification (calibration only)
 # are changed. This file is removed after use.
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - "ts-h-01-validate-postal-code-format-by-country"
+      - "ts-m-01-forbid-deleting-protected-user"
 
 jobs:
   e2e:
