@@ -1,6 +1,7 @@
 import {
   Controller,
   Delete,
+  ForbiddenException as ForbiddenHttpException,
   HttpStatus,
   NotFoundException as NotFoundHttpException,
   Param,
@@ -9,7 +10,7 @@ import { routesV1 } from '@config/app.routes';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteUserCommand } from './delete-user.service';
 import { match, Result } from 'oxide.ts';
-import { NotFoundException } from '@libs/exceptions';
+import { ForbiddenException, NotFoundException } from '@libs/exceptions';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiErrorResponse } from '@src/libs/api/api-error.response';
 
@@ -27,10 +28,15 @@ export class DeleteUserHttpController {
     description: NotFoundException.message,
     type: ApiErrorResponse,
   })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: ForbiddenException.message,
+    type: ApiErrorResponse,
+  })
   @Delete(routesV1.user.delete)
   async deleteUser(@Param('id') id: string): Promise<void> {
     const command = new DeleteUserCommand({ userId: id });
-    const result: Result<boolean, NotFoundException> =
+    const result: Result<boolean, NotFoundException | ForbiddenException> =
       await this.commandBus.execute(command);
 
     match(result, {
@@ -38,6 +44,8 @@ export class DeleteUserHttpController {
       Err: (error: Error) => {
         if (error instanceof NotFoundException)
           throw new NotFoundHttpException(error.message);
+        if (error instanceof ForbiddenException)
+          throw new ForbiddenHttpException(error.message);
         throw error;
       },
     });
