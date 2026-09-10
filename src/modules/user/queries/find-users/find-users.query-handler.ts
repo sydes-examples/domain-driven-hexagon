@@ -1,10 +1,20 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Ok, Result } from 'oxide.ts';
+import { Err, Ok, Result } from 'oxide.ts';
 import { PaginatedParams, PaginatedQueryBase } from '@libs/ddd/query.base';
 import { Paginated } from '@src/libs/ddd';
+import { ArgumentOutOfRangeException } from '@libs/exceptions';
 import { InjectPool } from 'nestjs-slonik';
 import { DatabasePool, sql } from 'slonik';
 import { UserModel, userSchema } from '../../database/user.repository';
+
+/**
+ * The shared PaginatedQueryRequestDto only bounds `limit` to 99999 (a
+ * generic, cross-endpoint sanity limit). This query additionally caps it
+ * much lower: a single unindexed OFFSET/LIMIT scan over `users` at a
+ * five-digit page size is a real performance risk this endpoint alone
+ * should reject, rather than execute.
+ */
+const MAX_FIND_USERS_LIMIT = 100;
 
 export class FindUsersQuery extends PaginatedQueryBase {
   readonly country?: string;
@@ -37,6 +47,14 @@ export class FindUsersQueryHandler implements IQueryHandler {
   async execute(
     query: FindUsersQuery,
   ): Promise<Result<Paginated<UserModel>, Error>> {
+    if (query.limit && query.limit > MAX_FIND_USERS_LIMIT) {
+      return Err(
+        new ArgumentOutOfRangeException(
+          `limit cannot exceed ${MAX_FIND_USERS_LIMIT}`,
+        ),
+      );
+    }
+
     /**
      * Constructing a query with Slonik.
      * More info: https://contra.com/p/AqZWWoUB-writing-composable-sql-using-java-script
