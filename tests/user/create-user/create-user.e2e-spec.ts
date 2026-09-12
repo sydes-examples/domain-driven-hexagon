@@ -63,4 +63,18 @@ defineFeature(feature, (test) => {
 
     iReceiveAnErrorWithStatusCode(then, ctx);
   });
+
+  test('I cannot create a user with an invalid postal code for their country', ({
+    given,
+    when,
+    then,
+  }) => {
+    const ctx = new TestContext<CreateUserTestContext>();
+
+    givenUserProfileData(given, ctx);
+
+    iSendARequestToCreateAUser(when, ctx);
+
+    iReceiveAnErrorWithStatusCode(then, ctx);
+  });
 });
