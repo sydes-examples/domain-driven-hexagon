@@ -3,6 +3,7 @@ import {
   ARGUMENT_NOT_PROVIDED,
   ARGUMENT_OUT_OF_RANGE,
   CONFLICT,
+  FORBIDDEN,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
 } from '.';
@@ -63,6 +64,24 @@ export class NotFoundException extends ExceptionBase {
   }
 
   readonly code = NOT_FOUND;
+}
+
+/**
+ * Used to indicate that an action is not allowed on a given entity
+ * (caller is authenticated/known but the operation is disallowed by a
+ * business rule, as opposed to an authorization/permissions failure)
+ *
+ * @class ForbiddenException
+ * @extends {ExceptionBase}
+ */
+export class ForbiddenException extends ExceptionBase {
+  static readonly message = 'Forbidden';
+
+  constructor(message = ForbiddenException.message) {
+    super(message);
+  }
+
+  readonly code = FORBIDDEN;
 }
 
 /**

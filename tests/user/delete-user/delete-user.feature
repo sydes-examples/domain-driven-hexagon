@@ -9,3 +9,8 @@ Feature: Delete a user
     Scenario: I can delete a user
         Given I send a request to delete my user
         Then I cannot see my user in a list of all users
+
+    Scenario: I cannot delete a protected user
+        Given my user is a protected admin
+        When I send a request to delete my user
+        Then I receive an error "Forbidden" with status code 403
