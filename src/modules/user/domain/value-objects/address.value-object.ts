@@ -43,5 +43,13 @@ export class Address extends ValueObject<AddressProps> {
     if (!Guard.lengthIsBetween(props.postalCode, 2, 10)) {
       throw new ArgumentOutOfRangeException('postalCode is out of range');
     }
+    /* US postal codes must be a 5-digit ZIP code (e.g. "10001").
+     * Country-specific postal code formats vary widely; this is a
+     * deliberately narrow, deterministic example rule for the US only. */
+    if (props.country === 'US' && !/^\d{5}$/.test(props.postalCode)) {
+      throw new ArgumentOutOfRangeException(
+        'postalCode is out of range: US postal code must match ^\\d{5}$',
+      );
+    }
   }
 }

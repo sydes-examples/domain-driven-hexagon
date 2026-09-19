@@ -24,3 +24,10 @@ Feature: Create a user
             | johng@mail.com | England | 123         | 29145      |
             | johng@mail.com | England | Road Avenue | @          |
             | #@!$           | $#@1    | %542        | !321       |
+
+    Scenario: I cannot create a user with an invalid postal code for their country
+        Given user profile data
+            | email              | country | street      | postalCode |
+            | john.doe@gmail.com | US      | Road Avenue | ABCDE      |
+        When I send a request to create a user
+        Then I receive an error "Bad Request" with status code 400
